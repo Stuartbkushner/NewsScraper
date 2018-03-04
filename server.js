@@ -5,58 +5,94 @@ var mongojs = require("mongojs");
 var bodyParser = require("body-parser");
 var cheerio = require("cheerio");
 var exphbs = require("express-handlebars");
+var logger = require("morgan");
+var mongoose = require("mongoose");
+var axios = require("axios");
 
+var db = require("./models");
+var PORT = 3000;
 var app = express();
 
-// Set the app up with body-parser and a static folder
-app.use(
-	bodyParser.urlencoded({
-		extended: false
-	});
-);
+// Configure middleware
+
+// Use morgan logger for requests
+app.use(logger("dev"));
+
+// Use body-parsing for handling form submissions
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Use express static to serve the public folder as a static directory
 app.use(express.static("public"));
 
-// Configure the database
-var databaseUrl = "newscraper";
-var collections = ["articles"];
-
-// Hook mongojs config to db variable
-var db = mongojs(databaseUrl, collections);
-
-// Log any mongojs errors to console
-db.on("error", function(error){
-	console.log("Database Error: ", error);
+// Since mongoose uses async queries by default, we will set it up to use promises and syntax instead
+// Connect to the Mongodb
+mongoose.Promise = Promise;
+mongoose.connect("mongodb://localhost/NewsScraper", {
+	useMongoClient: true
 });
-
-// handlebars
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
-app.set("view engine", "handlebars");
 
 // Routes
-// ======
-
-// Simple index route
-app.get("/", function(req, res){
-	res.send(index.html);
+app.get("/scrape", function(req, res){
+	axios.get("http://www.nytimes.com/").then(function(response){
+		var $ = cheerio.load(response.data);
+		$("article h1").each(function(i, element){
+			var result = {};
+			result.headline = $(this)
+				.children("a")
+				.text();
+			result.url = $(this)
+				.children("a")
+				.attr("href");
+			db.Headline.create(result)
+				.then(function(dbHeadline) {
+					console.log(dbHeadline);
+				})
+				.catch(function(err){
+					return res.json(err);
+			});
+		});
+		res.send("Scraping Complete!");
+	});
 });
 
-// Handle form submission and save it to mongo
-app.post("/save", function(req, res){
-	console.log(req.body);
+// Route for getting all headlines from the db
+app.get("/headlines", function(req, res){
+	db.Headline.find({})
+	.then(function(dbHeadline){
+		res.json(dbHeadline);
+	})
+	.catch(function(err){
+		res.json(err);
+	});
+});
 
-	db.articles.insert(req.body, function(error, saved){
-		// Log any errors
-		if (error) {
-			console.log(error);
-		} else {
-			// Otherwise, send note back to browser
-			// This will fire off the success function of the ajax request
-			res.send(saved);
-		}
+// Route for grabbing a specific headline and giving it its note
+app.get("/headlines/:id", function(req, res){
+	db.Headline.findOne({ _id: req.params.id })
+	.populate("note")
+	.then(function(dbHeadline){
+		res.json(dbHeadline);
+	})
+	.catch(function(err){
+		res.json(err);
+	});
+});
+
+// Route for saving/updating a headline's note
+app.post("/headlines/:id", function(req, res){
+	db.Note.create(req.body)
+	.then(function(dbNote){
+		return db.Headline.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+	})
+	.then(function(dbHeadline){
+		res.json(dbHeadline);
+	})
+	.catch(function(err){
+		res.json(err);
 	});
 });
 
 // Listen on port 3000
-app.listen(3000, function(){
-	console.log("App running on port 3000!");
+app.listen(PORT, function(){
+	console.log("App running on port " + PORT + "!");
 });
