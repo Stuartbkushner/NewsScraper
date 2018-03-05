@@ -11,7 +11,7 @@ var HeadlineSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: "Note"
 	},
-	url {
+	url: {
 		type: String,
 		required: true
 	}
