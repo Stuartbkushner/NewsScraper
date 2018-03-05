@@ -24,10 +24,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Use express static to serve the public folder as a static directory
 app.use(express.static("public"));
 
-// Since mongoose uses async queries by default, we will set it up to use promises and syntax instead
-// Connect to the Mongodb
+// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+// Set mongoose to leverage built in Javascript ES6 Promises
+// Connect to the Mongo DB
 mongoose.Promise = Promise;
-mongoose.connect("mongodb://localhost/NewsScraper", {
+mongoose.connect(MONGODB_URI, {
 	useMongoClient: true
 });
 
