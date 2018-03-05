@@ -1,9 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-</head>
-<body>
+{{#if article}}
+	{{#each article}}
+		{{#unless this.saved}}
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h2>
+						<a class="article-link" target="_blank" href="{{this.url}}">{{this.headline}}</a>
+						<a class="btn btn-primary save">Save Article</a>
+					</h2>
+				</div>
+				<div class="panel-body">
+					{{this.summary}}
+				</div>
+			</div>
+		{{/unless}}
+	{{/each}}
+{{#if article}}
 
-</body>
-</html>
+
