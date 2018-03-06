@@ -126,7 +126,7 @@ app.post("/articles/save/:id", function(req, res){
 
 // Route for deleting a saved article
 app.post("/articles/delete/:id", function(req, res){
-	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false }, { comments: [] });
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, comments: [] });
 })
 .then(function(dbArticle) {
 	res.json(dbArticle);
@@ -139,7 +139,7 @@ app.post("/articles/delete/:id", function(req, res){
 app.post("/comments/save/:id", function(req, res){
 	db.Comment.create(req.body)
 	.then(function(dbComment){
-		return db.Article.findOneAndUpdate({ _id: req.params.id }, { $push: { comments: dbComment._id } }, { new: true });
+		return db.Article.findOneAndUpdate({ _id: req.params.id }, { $push: { comments: comment } }, { new: true });
 	})
 	.then(function(dbArticle){
 		res.json(dbArticle);
@@ -150,10 +150,10 @@ app.post("/comments/save/:id", function(req, res){
 });
 
 // Route for deleting a note from the comment
-app.post("/comments/delete/:comment_id/:article_id", function(req, res){
-	db.Comment.fineOneAndRemove({ _comment_id: req.params.comment_id })
+app.delete("/comments/delete/:comment_id/:article_id", function(req, res){
+	db.Comment.findOneAndRemove({ _comment_id: req.params.comment_id })
 	.then(function(dbComment){
-		return.dbArticle.fineOneAndUpdate({ _article_id, req.params.article_id }, { $pull: { comment_id: req.params.comment_id }});
+		return.dbArticle.findOneAndUpdate({ _article_id: req.params.article_id }, { $pull: { comments: req.params.comment_id }});
 	})
 	.then(function(dbArticle){
 		res.json(dbArticle);
