@@ -16,7 +16,7 @@
 			</div>
 			<ul class="nav navbar-nav">
 				<button id="saved-btn" type="button" class="btn btn-primary" href="/saved">View Saved Articles</button>
-				<button id="scrape-btn" type="button" class="btn btn-danger" data-toggle="modal" data-target="#myModal">Scrape New Articles</button>
+				<button id="scrape-btn" type="button" class="btn btn-danger" data-toggle="modal" data-target="#scrape-modal">Scrape New Articles</button>
 			</ul>
 		</div>
 	</nav>
@@ -34,7 +34,7 @@
 		</div>
 	</footer>
 
-	<!----Modal for scraping articles -->
+	<!-- Modal for scraping articles -->
 	<div id="scrape-modal" class="modal fade" role="dialog">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -42,10 +42,15 @@
 					<button type="button" class="close" data-dismiss="modal">&times;</button>
 					<h2 class="modal-title"><strong>It's Scrapin' Time!</strong></h2>
 				</div>
+				<div class="modal-body">
+					<p>Articles Scraped!</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
 			</div>
 		</div>
 	</div>
-
 
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

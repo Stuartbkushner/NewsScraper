@@ -24,6 +24,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Use express static to serve the public folder as a static directory
 app.use(express.static("public"));
 
+// Set up Handlebars
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view-engine", "handlebars");
+
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
@@ -35,11 +39,31 @@ mongoose.connect(MONGODB_URI, {
 });
 
 // Routes
+
+// Get all articles
 app.get("/", function(req, res){
-	
+	db.Article.find({"saved": false})
+	.then(function(dbHome){
+		res.json(dbHome);
+	})
+	.catch(function(error){
+		res.json(error);
+	});
+});
+
+// Get all saved articles
+app.get("/saved", function(req, res){
+	db.Article.find({"saved": true})
+	.populate("comments")
+	.then(function(dbSaved) {
+		res.json(dbSaved);
+	})
+	.catch(function(error){
+		res.json(error);
+	});
 })
 
-
+// Route that lets the user scrape the articles from the New York Times
 app.get("/scrape", function(req, res){
 	axios.get("http://www.nytimes.com/").then(function(response){
 		var $ = cheerio.load(response.data);
@@ -66,7 +90,7 @@ app.get("/scrape", function(req, res){
 	});
 });
 
-// Route for getting all headlines from the db
+// Route for getting all articles from the db
 app.get("/articles", function(req, res){
 	db.Article.find({})
 	.then(function(dbArticle){
@@ -77,10 +101,10 @@ app.get("/articles", function(req, res){
 	});
 });
 
-// Route for grabbing a specific headline and giving it its note
+// Route for grabbing a specific article and giving it its comments
 app.get("/articles/:id", function(req, res){
 	db.Article.findOne({ _id: req.params.id })
-	.populate("summary")
+	.populate("comments")
 	.then(function(dbArticle){
 		res.json(dbArticle);
 	})
@@ -89,14 +113,50 @@ app.get("/articles/:id", function(req, res){
 	});
 });
 
-// Route for saving/updating a headline's note
-app.post("/articles/:id", function(req, res){
-	db.Note.create(req.body)
-	.then(function(dbNote){
-		return db.Headline.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+// Route for saving an article
+app.post("/articles/save/:id", function(req, res){
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true });
+})
+.then(function(dbArticle) {
+	res.json(dbArticle);
+})
+.catch(function(err){
+	res.json(err);
+});
+
+// Route for deleting a saved article
+app.post("/articles/delete/:id", function(req, res){
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false }, { comments: [] });
+})
+.then(function(dbArticle) {
+	res.json(dbArticle);
+})
+.catch(function(err){
+	res.json(err);
+});
+
+// Route for creating a new note
+app.post("/comments/save/:id", function(req, res){
+	db.Comment.create(req.body)
+	.then(function(dbComment){
+		return db.Article.findOneAndUpdate({ _id: req.params.id }, { $push: { comments: dbComment._id } }, { new: true });
 	})
-	.then(function(dbHeadline){
-		res.json(dbHeadline);
+	.then(function(dbArticle){
+		res.json(dbArticle);
+	})
+	.catch(function(err){
+		res.json(err);
+	});
+});
+
+// Route for deleting a note from the comment
+app.post("/comments/delete/:comment_id/:article_id", function(req, res){
+	db.Comment.fineOneAndRemove({ _comment_id: req.params.comment_id })
+	.then(function(dbComment){
+		return.dbArticle.fineOneAndUpdate({ _article_id, req.params.article_id }, { $pull: { comment_id: req.params.comment_id }});
+	})
+	.then(function(dbArticle){
+		res.json(dbArticle);
 	})
 	.catch(function(err){
 		res.json(err);

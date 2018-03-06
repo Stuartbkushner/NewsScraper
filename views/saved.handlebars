@@ -1,2 +1,59 @@
-<!--All saved articles go here -->
-<!-- Create modal that keeps track of notes -->
+{{#if article}}
+	{{#each article}}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h2>
+					<a class="article-link" target="_blank" href={{this.url}}>{{this.headline}}</a>
+					<button type="button" class="btn btn-danger delete" data-id={{this._id}}>Delete From Saved</button>
+					<button type="button" class="btn btn-danger addComment" data-toggle="modal" data-target="#commentModule{{this._id}}" data-id={{this._id}}>Add Comment</button>
+				</h2>
+			</div>
+			<div class="panel-body">
+				{{this.summary}}
+			</div>			
+		</div>
+	{{/each}}
+{{else}}
+	<div class="panel panel-default">
+		<div class="panel-body">
+			<p class="noSaved">You have no saved articles.</p>
+		</div>
+	</div>
+{{/if}}
+
+<div id="commentModule{{this._id}}" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h2 class="modal-title"><strong>Comments for {{this.headline}}</strong></h2>
+			</div>
+			<div class="modal-body">
+				{{#if this.comment}}
+					{{#each this.comment}}
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<p class="previousComments">{{this.body}}</p>
+								<button type="button" class="btn btn-info deleteComment" data-comment-id={{this._id}} data-article-id={{this.article}}>X</button>
+								<button type="button" class="btn btn-warning delete" data-id={{this._id}}>Delete</button>
+							</div>
+						</div>
+					{{/each}}
+				{{else}}
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<p class="noCigar">No comments published</p>
+						</div>
+					</div>
+				{{/if}}
+				<div class="form-group">
+					<label for="comment">Comment</label>
+					<textarea class="form-control" rows="5" id="comment"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default saveComment" data-id={{this._id}}>Save Comment</button>
+			</div>
+		</div>
+	</div>
+</div>
