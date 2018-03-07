@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 
 var Schema = mongoose.Schema;
 
-var ArticleeSchema = new Schema({
+var ArticleSchema = new Schema({
 	headline: {
 		type: String,
 		required: true
@@ -14,11 +14,11 @@ var ArticleeSchema = new Schema({
 	url: {
 		type: String,
 		required: true
-	}
+	},
 	saved: {
 		type: Boolean,
 		default: false
-	}
+	},
 	comments: [{
 		type: Schema.Types.ObjectId,
 		ref: "Comment"

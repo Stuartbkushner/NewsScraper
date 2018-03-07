@@ -42,7 +42,7 @@ mongoose.connect(MONGODB_URI, {
 
 // Get all articles
 app.get("/", function(req, res){
-	db.Article.find({"saved": false})
+	db.Article.find({ saved : false})
 	.then(function(dbHome){
 		res.json(dbHome);
 	})
@@ -53,7 +53,7 @@ app.get("/", function(req, res){
 
 // Get all saved articles
 app.get("/saved", function(req, res){
-	db.Article.find({"saved": true})
+	db.Article.find({ saved: true })
 	.populate("comments")
 	.then(function(dbSaved) {
 		res.json(dbSaved);
@@ -115,51 +115,66 @@ app.get("/articles/:id", function(req, res){
 
 // Route for saving an article
 app.post("/articles/save/:id", function(req, res){
-	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true });
-})
-.then(function(dbArticle) {
-	res.json(dbArticle);
-})
-.catch(function(err){
-	res.json(err);
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true }, function(err, article) {
+		if (err) {
+			throw err;
+		} else {
+			res.send(article);
+			console.log(article);
+		}
+	});
 });
 
 // Route for deleting a saved article
 app.post("/articles/delete/:id", function(req, res){
-	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, comments: [] });
-})
-.then(function(dbArticle) {
-	res.json(dbArticle);
-})
-.catch(function(err){
-	res.json(err);
-});
-
-// Route for creating a new note
-app.post("/comments/save/:id", function(req, res){
-	db.Comment.create(req.body)
-	.then(function(dbComment){
-		return db.Article.findOneAndUpdate({ _id: req.params.id }, { $push: { comments: comment } }, { new: true });
-	})
-	.then(function(dbArticle){
-		res.json(dbArticle);
-	})
-	.catch(function(err){
-		res.json(err);
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, comments: [] }, function(err, article){
+		if (err) {
+			throw err;
+		} else {
+			res.send(article);
+			console.log(article);
+		}
 	});
 });
 
-// Route for deleting a note from the comment
+
+// Route for creating a new comment
+app.post("/comments/save/:id", function(req, res){
+	var newComment = new Comment({
+		title: req.body.text,
+		comment: req.params.id
+	});
+	newComment.save(function(err, comment) {
+		if (err) {
+			throw err;
+		} else {
+			db.Article.findOneAndUpdate({ _id: req.params.id}, {$push: { comments: comment }
+			})
+			.then(function(dbArticle) {
+				res.json(dbArticle);
+			})
+			.catch(function(err){
+				res.json(err);
+			});
+		}
+	});
+});
+
+// Route for deleting a comment
 app.delete("/comments/delete/:comment_id/:article_id", function(req, res){
-	db.Comment.findOneAndRemove({ _comment_id: req.params.comment_id })
-	.then(function(dbComment){
-		return.dbArticle.findOneAndUpdate({ _article_id: req.params.article_id }, { $pull: { comments: req.params.comment_id }});
-	})
-	.then(function(dbArticle){
-		res.json(dbArticle);
-	})
-	.catch(function(err){
-		res.json(err);
+	db.Comment.findOneAndRemove({ _comment_id: req.params.comment_id }, function(err){
+		if (err) {
+			throw err;
+		} else {
+			db.Article.findOneAndUpdate({ _id: req.params.article_id }, { $push: {comments: req.params.comment_id } 
+			})
+			.then(function(dbArticle) {
+				res.json(dbArticle);
+			})
+			.catch(function(err){
+				res.json(err);
+			});
+		}
 	});
 });
 
