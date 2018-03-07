@@ -9,6 +9,7 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 var axios = require("axios");
 var path = require("path");
+var request = require("request");
 
 var db = require("./models");
 var PORT = 3000;
@@ -36,15 +37,16 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 // Connect to the Mongo DB
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI, {
-	useMongoClient: true
+	//useMongoClient: true
 });
 
 // Routes
 
 // Get all articles
 app.get("/", function(req, res){
-	db.Article.find({ saved : false})
+	db.Article.find({})
 	.then(function(dbHome){
+		console.log(dbHome);
 		res.json(dbHome);
 	})
 	.catch(function(error){
@@ -67,27 +69,31 @@ app.get("/saved", function(req, res){
 // Route that lets the user scrape the articles from the New York Times
 app.get("/scrape", function(req, res){
 	axios.get("http://www.nytimes.com/").then(function(response){
+		console.log("response:", response.data);
 		var $ = cheerio.load(response.data);
 		$("article h1").each(function(i, element){
 			var result = {};
-			result.article = $(this)
-				.children("a")
-				.text();
+			result.article = $(this).children("a").text();
 			result.url = $(this)
 				.children("a")
 				.attr("href");
 			result.summary = $(this)
 				.children("p")
 				.text();
+		console.log('result: ', result);
 			db.Article.create(result)
 				.then(function(dbArticle) {
-					console.log(dbArticle);
+					console.log("dbArticle:", dbArticle);
 				})
 				.catch(function(err){
+					console.log('inside the catch', err);
 					return res.json(err);
-			});
+				});
 		});
 		res.send("Scraping Complete!");
+	})
+	.catch(function(err){
+		res.json(err);
 	});
 });
 
@@ -147,7 +153,7 @@ app.post("/comments/save/:id", function(req, res){
 		if (err) {
 			throw err;
 		} else {
-			db.Article.findOneAndUpdate({ _id: req.params.id}, {$push: { comments: comment }
+			db.Article.findOneAndUpdate({ _id: req.params.id}, { $push: { comments: comment }
 			})
 			.then(function(dbArticle) {
 				res.json(dbArticle);
