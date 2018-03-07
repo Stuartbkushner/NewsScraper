@@ -115,25 +115,23 @@ app.get("/articles/:id", function(req, res){
 
 // Route for saving an article
 app.post("/articles/save/:id", function(req, res){
-	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true }, function(err, article) {
-		if (err) {
-			throw err;
-		} else {
-			res.send(article);
-			console.log(article);
-		}
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true })
+	.then(function(dbArticle){
+		res.json(dbArticle);
+	})
+	.catch(function(err){
+		res.json(err);
 	});
 });
 
 // Route for deleting a saved article
 app.post("/articles/delete/:id", function(req, res){
-	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, comments: [] }, function(err, article){
-		if (err) {
-			throw err;
-		} else {
-			res.send(article);
-			console.log(article);
-		}
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, comments: [] })
+	.then(function(dbArticle){
+		res.json(dbArticle);
+	})
+	.catch(function(err){
+		res.json(err);
 	});
 });
 
