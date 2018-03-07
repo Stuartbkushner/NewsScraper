@@ -41,7 +41,7 @@ $(document).on("click", ".saveComment", function(){
 		$("#comment" + thisId).val("");
 		$("#commentModal").modal("hide");
 		window.location = "/saved"
-	});
+	})
 });
 
 // Delete a comment

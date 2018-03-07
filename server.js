@@ -8,6 +8,7 @@ var exphbs = require("express-handlebars");
 var logger = require("morgan");
 var mongoose = require("mongoose");
 var axios = require("axios");
+var path = require("path");
 
 var db = require("./models");
 var PORT = 3000;
