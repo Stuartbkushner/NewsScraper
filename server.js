@@ -38,7 +38,7 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 // Connect to the Mongo DB
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI, {
-  useMongoClient: true
+  //useMongoClient: true
 });
 
 // Routes
@@ -87,7 +87,7 @@ app.get("/articles/:id", function(req, res){
 app.post("/articles/:id", function(req, res){
 	db.Comment.create(req.body)
 	.then(function(dbComment){
-		return db.Article.findOneAndUpdate({_id: req.params.id}, {$push: {comments: dbComment}})
+		return db.Article.findOneAndUpdate({ _id: req.params.id }, {$push: { comments: dbComment }})
 		.then(function(dbRes){
 			res.redirect("/");
 		});
@@ -96,14 +96,14 @@ app.post("/articles/:id", function(req, res){
 
 // Route for deleting a saved article
 app.post("/articles/delete/:id", function(req, res){
-	db.Comment.remove({_id: req.params.id}).then(function(dbRemove){
+	db.Comment.remove({ _id: req.params.id }).then(function(dbRemove){
 		res.json(dbRemove);
 	})
 });
 
 // Route for saving an article
 app.post("/articles/save/:id", function(req, res){
-	db.Article.findOneAndUpdate({_id: req.params.id}, {saved: true})
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true })
 	.then(function(dbReturn){
 		res.redirect("/");
 	})
@@ -111,7 +111,7 @@ app.post("/articles/save/:id", function(req, res){
 
 // Route for removing an article from saved
 app.post("/articles/unsave/:id", function(req, res){
-	db.Article.findOneAndUpdate({_id: req.params.id}, {saved: false})
+	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false })
 	.then(function(dbReturn){
 		res.redirect("/");
 	})
@@ -119,8 +119,8 @@ app.post("/articles/unsave/:id", function(req, res){
 
 // Display all saved articles
 app.get("/saved", function(req, res){
-	db.Article.find({saved: true}).populate("comments").then(function(data){
-		res.render("saved", {articles: data});
+	db.Article.find({ saved: true }).populate("comments").then(function(data){
+		res.render("saved", { articles: data });
 	}).catch(function(err){
 		res.json(err);
 	})
