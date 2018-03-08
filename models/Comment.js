@@ -3,12 +3,9 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var CommentSchema = new Schema({
-	title: {
+	body: {
 		type: String,
-	},
-	comment: {
-		type: Schema.Types.ObjectId,
-		ref: "Comment"
+		required: true
 	}
 });
 

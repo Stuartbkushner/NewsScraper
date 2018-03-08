@@ -3,23 +3,23 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var ArticleSchema = new Schema({
-	headline: {
+	title: {
 		type: String,
-		// required: true
+		required: true,
+		unique: true
 	},
 	summary: {
 		type: String,
-		// required: true
 	},
-	url: {
+	link: {
 		type: String,
-		// required: true
+		required: true
 	},
 	saved: {
 		type: Boolean,
 		default: false
 	},
-	comments: [{
+	comment: [{
 		type: Schema.Types.ObjectId,
 		ref: "Comment"
 	}]
