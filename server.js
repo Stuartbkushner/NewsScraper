@@ -46,7 +46,7 @@ mongoose.connect(MONGODB_URI, {
 // Route for scraping all of the articles
 app.get("/scrape", function(req, res){
 	axios.get("https://www.nytimes.com/").then(function(response){
-		var $ = cheerio.load(response.data);
+		var $ = cheerio.load(response);
 		$("article.story").each(function(i, element){
 			var result = {};
 			result.title = $(this).children("h2.story-heading").children("a").text();
@@ -58,17 +58,17 @@ app.get("/scrape", function(req, res){
 				res.send("Scraping Complete!");
 			})
 			.catch(function(err){
-				res.json(err);
+				return res.json(err);
 			});
 		});
 		res.redirect("/");
 	});
 });
 
-// Route for grabbing every article
+// Route for grabbing every article from the DB
 app.get("/", function(req, res){
 	db.Article.find({}).populate("comments").then(function(data){
-		res.render("index", { articles: data });
+		res.render("home", { articles: data });
 	}).catch(function(err){
 		res.json(err);
 	});
@@ -110,7 +110,7 @@ app.post("/articles/save/:id", function(req, res){
 });
 
 // Route for removing an article from saved
-app.post("/articles/unsave/:id", function(req, res){
+app.post("/articles/remove/:id", function(req, res){
 	db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false })
 	.then(function(dbReturn){
 		res.redirect("/");
@@ -123,7 +123,7 @@ app.get("/saved", function(req, res){
 		res.render("saved", { articles: data });
 	}).catch(function(err){
 		res.json(err);
-	})
+	});
 });
 
 

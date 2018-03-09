@@ -1,60 +1,57 @@
-// This is where all the button functionality will go
+// All button functionality goes here
 
-// What happens when you click on the save button
-$(document).on("click", ".save", function(){
+// When user clicks to save an article
+$(document).on("click", ".save-button", function(){
 	var thisId = $(this).attr("data-id");
 	$.ajax({
 		method: "POST",
 		url: "/articles/save/" + thisId
-	})
-	.then(function(data){
+	}).done(function(data){
 		console.log(data);
-		window.location = "/"
-	})
+		location.reload();
+	});
 });
 
-// Delete an article from the saved page
-$(document).on("click", ".delete", function(){
+// When user clicks to save a comment
+$(document).on("click", "#saveComment", function(){
+	var thisId = $(this).attr("data-id");
+	var commentText = $("#body-input" + thisId).val();
+	$.ajax({
+		method: "POST",
+		url: "/articles/" + thisId,
+		data: {
+			text: commentText
+		}
+	})
+	.done(function(data){
+		console.log(data);
+		location.reload();
+	});
+	commentText.val("");
+});
+
+
+// When user wants to remove a saved article
+$(document).on("click", ".remove-save-btn", function(){
+	var thisId = $(this).attr("data-id");
+	$.ajax({
+		method: "POST",
+		url: "/articles/remove/" + thisId
+	}).done(function(data){
+		console.log(data);
+		location.reload();
+	});
+});
+
+
+// When user wants to delete a saved comment
+$(document).on("click", "#deleteComment", function(){
 	var thisId = $(this).attr("data-id");
 	$.ajax({
 		method: "POST",
 		url: "/articles/delete/" + thisId
-	})
-	.then(function(data){
+	}).done(function(data){
 		console.log(data);
-		window.location = "/saved"
-	})
-});
-
-// Save a comment
-$(document).on("click", ".saveComment", function(){
-	var thisId = $(this).attr("data-id");
-	$.ajax({
-		method: "POST",
-		url: "/comments/save/" + thisId,
-		data: {
-			text: $("#comment" + thisId).val();
-		}
-	})
-	.then(function(data){
-		console.log(data);
-		$("#comment" + thisId).val("");
-		$("#commentModal").modal("hide");
-		window.location = "/saved"
-	})
-});
-
-// Delete a comment
-$(document).on("click", ".deleteComment", function(){
-	var thisArticleId = $(this).attr("data-article-id");
-	var thisCommentId = $(this).attr("data-comment-id");
-	$.ajax({
-		method: "DELETE",
-		url: "/comments/delete/" + thisArticleId + "/" + thisCommentId
-	})
-	.then(function(data){
-		console.log(data);
-		$("#commentModal").modal("hide");
-		window.location = "/saved"
-	})
+		location.reload();
+	});
 });

@@ -1,60 +1,78 @@
-{{#if article}}
-	{{#each article}}
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h2>
-					<a class="article-link" target="_blank" href={{this.url}}>{{this.headline}}</a>
-					<button type="button" class="btn btn-danger delete" data-id={{this._id}}>Delete From Saved</button>
-					<button type="button" class="btn btn-danger addComment" data-toggle="modal" data-target="#commentModal{{this._id}}" data-id={{this._id}}>Add Comment</button>
-				</h2>
-			</div>
-			<div class="panel-body">
-				{{this.summary}}
-			</div>			
-		</div>
-	{{/each}}
-{{else}}
+{{#unless articles}}
 	<div class="panel panel-default">
 		<div class="panel-body">
-			<p class="noSaved">You have no saved articles.</p>
+			<p class="noArticles text-center">You have no saved articles.</p>
+		</div>
+	</div>
+{{/unless}}
+
+{{#if articles}}
+	<div class="row">
+		<div class="col-md-12">
+			{{#each articles}}
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<div class="row">
+							<div class="col-md-10">
+								<h3><a href="{{this.link}}" class="title">{{this.title}}</a></h3>
+							</div>
+							<div class="col-md-2">
+								<button class="btn btn-primary add-comment-btn" data-id="{{this._id}}" data-toggle="modal"
+								data-target="#modal_{{this._id}}">Leave A Comment</button>
+								<button class="btn btn-danger remove-save-btn" data-id="{{this._id}}">Remove from Saved</button>
+							</div>
+						</div>
+					</div>
+					<div class="panel-body">
+						{{#if this.summary}}
+							<p>{{this.summary}}</p>
+						{{/if}}
+						{{#unless this.summary}}
+							<p>No Summary Available</p>
+						{{/unless}}
+					</div>
+				</div>
+			{{/each}}
 		</div>
 	</div>
 {{/if}}
 
-<!-- The comment module -->
-<div id="commentModal{{this._id}}" class="modal fade" role="dialog">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-				<h2 class="modal-title"><strong>Comments for {{this.headline}}</strong></h2>
-			</div>
-			<div class="modal-body">
-				{{#if this.comment}}
-					{{#each this.comment}}
-						<div class="panel panel-default">
-							<div class="panel-body">
-								<p class="previousComments">{{this.body}}</p>
-								<button type="button" class="btn btn-info deleteComment" data-comment-id={{this._id}} data-article-id={{this.article}}>X</button>
-								<button type="button" class="btn btn-warning delete" data-id={{this._id}}>Delete</button>
+{{#each articles}}
+	<div id="modal_{{this._id}}" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Comment For Article {{this._id}}</h4>
+				</div>
+				<div class="modal-body">
+					<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h4>Write A Comment</h4>
+						<div>
+							<div class="panel-body" id="text-container">
+								<textarea type="text" id="body-input{{this._id}}" name="body" class="comment-box"></textarea>
+								<br>
+								<br>
+								<button data-id={{this._id}} id="saveComment" class="btn btn warning">Save Comment</button>
 							</div>
 						</div>
-					{{/each}}
-				{{else}}
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<p class="noCigar">No comments published</p>
+						<br>
+						<div class="panel panel-primary">
+							<div class="panel-heading">
+								<h4>All Comments Saved</h4>
+							<div>
+							<div class="panel-body">
+								{{#each comments}}
+									<div class="comment">
+										{{this.body}}<button data-comment{{this._id}} id="deleteComment" class="btn btn-primary">Delete Comment</button>
+									</div>
+								{{/each}}
+							</div>
 						</div>
 					</div>
-				{{/if}}
-				<div class="form-group">
-					<label for="comment">Comment</label>
-					<textarea class="form-control" rows="5" id="comment{{this._id}}"></textarea>
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default saveComment" data-id={{this._id}}>Save Comment</button>
 			</div>
 		</div>
 	</div>
-</div>
+{{/each}}
