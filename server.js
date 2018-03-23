@@ -46,8 +46,8 @@ mongoose.connect(MONGODB_URI, {
 // Route for scraping all of the articles
 app.get("/scrape", function(req, res){
 	axios.get("https://www.nytimes.com/").then(function(response){
-		var $ = cheerio.load(response);
-		$("article.story").each(function(i, element){
+		var $ = cheerio.load(response.data);
+		$("article story").each(function(i, element){
 			var result = {};
 			result.title = $(this).children("h2.story-heading").children("a").text();
 			result.summary = $(this).children("p.summary").text();
@@ -58,7 +58,7 @@ app.get("/scrape", function(req, res){
 				res.send("Scraping Complete!");
 			})
 			.catch(function(err){
-				return res.json(err);
+				console.log(err);
 			});
 		});
 		res.redirect("/");
